@@ -1,0 +1,276 @@
+[
+  {
+    "id": 1,
+    "name": "Software Engineer",
+    "description": "Build applications and software solutions",
+    "skills": [
+      "Programming",
+      "Problem Solving",
+      "Logic"
+    ],
+    "education": "B.Tech/B.E. in Computer Science",
+    "salary": "₹6-25 LPA",
+    "stream": "Science (PCM)"
+  },
+  {
+    "id": 2,
+    "name": "Data Analyst",
+    "description": "Analyze data to help businesses make decisions",
+    "skills": [
+      "Statistics",
+      "Excel",
+      "SQL",
+      "Python"
+    ],
+    "education": "B.Sc/B.Tech in Data Science or related field",
+    "salary": "₹4-15 LPA",
+    "stream": "Science (PCM)"
+  },
+  {
+    "id": 3,
+    "name": "AI Engineer",
+    "description": "Develop artificial intelligence and machine learning systems",
+    "skills": [
+      "Python",
+      "Machine Learning",
+      "Mathematics"
+    ],
+    "education": "B.Tech in AI/ML or Computer Science",
+    "salary": "₹8-30 LPA",
+    "stream": "Science (PCM)"
+  },
+  {
+    "id": 4,
+    "name": "Cybersecurity Specialist",
+    "description": "Protect systems and networks from cyber threats",
+    "skills": [
+      "Networking",
+      "Security Tools",
+      "Problem Solving"
+    ],
+    "education": "B.Tech in Computer Science or Cybersecurity",
+    "salary": "₹6-20 LPA",
+    "stream": "Science (PCM)"
+  },
+  {
+    "id": 5,
+    "name": "Entrepreneur",
+    "description": "Start and run your own business",
+    "skills": [
+      "Leadership",
+      "Risk-taking",
+      "Innovation"
+    ],
+    "education": "BBA/MBA (optional)",
+    "salary": "Variable",
+    "stream": "Commerce/Any"
+  },
+  {
+    "id": 6,
+    "name": "Business Analyst",
+    "description": "Bridge technology and business needs",
+    "skills": [
+      "Analytics",
+      "Communication",
+      "Business Knowledge"
+    ],
+    "education": "BBA/B.Tech with MBA",
+    "salary": "₹5-18 LPA",
+    "stream": "Commerce/Any"
+  },
+  {
+    "id": 7,
+    "name": "Marketing Manager",
+    "description": "Create and execute marketing strategies",
+    "skills": [
+      "Creativity",
+      "Analytics",
+      "Communication"
+    ],
+    "education": "BBA/MBA in Marketing",
+    "salary": "₹5-20 LPA",
+    "stream": "Commerce/Any"
+  },
+  {
+    "id": 8,
+    "name": "Financial Analyst",
+    "description": "Analyze financial data and guide investment decisions",
+    "skills": [
+      "Excel",
+      "Financial Modeling",
+      "Analysis"
+    ],
+    "education": "B.Com/BBA with finance specialization",
+    "salary": "₹4-15 LPA",
+    "stream": "Commerce"
+  },
+  {
+    "id": 9,
+    "name": "UI/UX Designer",
+    "description": "Design user-friendly digital experiences",
+    "skills": [
+      "Creativity",
+      "Empathy",
+      "Design Tools (Figma)"
+    ],
+    "education": "B.Des/BFA or bootcamps",
+    "salary": "₹4-12 LPA",
+    "stream": "Any"
+  },
+  {
+    "id": 10,
+    "name": "Graphic Designer",
+    "description": "Create visual content for brands and media",
+    "skills": [
+      "Adobe Suite",
+      "Creativity",
+      "Visual Communication"
+    ],
+    "education": "B.Des/BFA in Graphic Design",
+    "salary": "₹3-10 LPA",
+    "stream": "Any"
+  },
+  {
+    "id": 11,
+    "name": "Animator",
+    "description": "Bring stories to life through animation",
+    "skills": [
+      "Animation Software",
+      "Storytelling",
+      "Creativity"
+    ],
+    "education": "B.Des/Diploma in Animation",
+    "salary": "₹3-12 LPA",
+    "stream": "Any"
+  },
+  {
+    "id": 12,
+    "name": "Product Designer",
+    "description": "Design products that solve user problems",
+    "skills": [
+      "User Research",
+      "Prototyping",
+      "Design Thinking"
+    ],
+    "education": "B.Des in Product Design",
+    "salary": "₹5-15 LPA",
+    "stream": "Any"
+  },
+  {
+    "id": 13,
+    "name": "Doctor",
+    "description": "Provide healthcare and save lives",
+    "skills": [
+      "Biology",
+      "Empathy",
+      "Problem Solving"
+    ],
+    "education": "MBBS (5.5 years)",
+    "salary": "₹8-50+ LPA",
+    "stream": "Science (PCB)"
+  },
+  {
+    "id": 14,
+    "name": "Research Scientist",
+    "description": "Conduct scientific research and experiments",
+    "skills": [
+      "Scientific Method",
+      "Analysis",
+      "Curiosity"
+    ],
+    "education": "B.Sc/M.Sc/PhD in relevant field",
+    "salary": "₹5-20 LPA",
+    "stream": "Science"
+  },
+  {
+    "id": 15,
+    "name": "Biotechnologist",
+    "description": "Apply biology to develop new products and technologies",
+    "skills": [
+      "Biology",
+      "Lab Techniques",
+      "Research"
+    ],
+    "education": "B.Tech/M.Tech in Biotechnology",
+    "salary": "₹4-15 LPA",
+    "stream": "Science (PCB)"
+  },
+  {
+    "id": 16,
+    "name": "Environmental Scientist",
+    "description": "Study and protect the environment",
+    "skills": [
+      "Environmental Science",
+      "Data Analysis",
+      "Field Work"
+    ],
+    "education": "B.Sc in Environmental Science",
+    "salary": "₹4-12 LPA",
+    "stream": "Science"
+  },
+  {
+    "id": 17,
+    "name": "Content Writer",
+    "description": "Create engaging written content for various platforms",
+    "skills": [
+      "Writing",
+      "Research",
+      "Creativity"
+    ],
+    "education": "BA in English/Journalism or any degree",
+    "salary": "₹3-10 LPA",
+    "stream": "Arts/Any"
+  },
+  {
+    "id": 18,
+    "name": "Journalist",
+    "description": "Report news and tell important stories",
+    "skills": [
+      "Writing",
+      "Communication",
+      "Investigation"
+    ],
+    "education": "BA/MA in Journalism",
+    "salary": "₹3-12 LPA",
+    "stream": "Arts/Any"
+  },
+  {
+    "id": 19,
+    "name": "Artist",
+    "description": "Create visual art and express creativity",
+    "skills": [
+      "Artistic Skills",
+      "Creativity",
+      "Dedication"
+    ],
+    "education": "BFA/MFA in Fine Arts",
+    "salary": "₹2-15 LPA (varies widely)",
+    "stream": "Arts"
+  },
+  {
+    "id": 20,
+    "name": "Musician",
+    "description": "Create and perform music",
+    "skills": [
+      "Musical Talent",
+      "Practice",
+      "Performance"
+    ],
+    "education": "Formal training or self-taught",
+    "salary": "₹2-20 LPA (varies widely)",
+    "stream": "Arts"
+  },
+  {
+    "id": 21,
+    "name": "Career Counseling Recommended",
+    "description": "Consider speaking with a career counselor to explore more options",
+    "skills": [
+      "Self-reflection",
+      "Research",
+      "Open-mindedness"
+    ],
+    "education": "Varies",
+    "salary": "Varies",
+    "stream": "Any"
+  }
+]
