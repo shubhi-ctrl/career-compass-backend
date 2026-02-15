@@ -1,13 +1,14 @@
 const recommendationEngine = require("../services/recommendationEngine");
+const geminiService = require("../services/geminiService");
 const careers = require("../data/careers.json");
-const questions = require("../data/questions.json");
 
 // Get assessment questions
 exports.getQuestions = (req, res) => {
   try {
+    // Return empty for now since frontend has its own questions
     res.json({
       success: true,
-      questions: questions
+      message: "Questions are handled by frontend"
     });
   } catch (error) {
     res.status(500).json({
@@ -17,7 +18,7 @@ exports.getQuestions = (req, res) => {
   }
 };
 
-// Submit assessment and get matched careers
+// Submit assessment and get matched careers WITH AI INSIGHTS
 exports.submitAssessment = async (req, res) => {
   try {
     const { answers } = req.body;
@@ -29,12 +30,17 @@ exports.submitAssessment = async (req, res) => {
       });
     }
 
-    // Get recommendations based on answers
+    // Get recommendations based on swipe answers
     const recommendations = recommendationEngine.getRecommendationsFromAnswers(answers);
+
+    // Generate AI insights using Gemini
+    const aiInsights = await geminiService.generateCareerInsights(answers, recommendations);
 
     res.json({
       success: true,
-      recommendedCareers: recommendations
+      recommendedCareers: recommendations,
+      aiInsights: aiInsights, // NEW: Gemini-powered personalized insight!
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error("Error in submitAssessment:", error);
@@ -45,7 +51,7 @@ exports.submitAssessment = async (req, res) => {
   }
 };
 
-// Get career suggestions (your existing endpoint)
+// Get career suggestions (legacy endpoint)
 exports.getSuggestions = async (req, res) => {
   try {
     const { interest, subject, classLevel } = req.body;
@@ -81,7 +87,8 @@ exports.getAllCareers = (req, res) => {
   try {
     res.json({
       success: true,
-      careers: careers
+      careers: careers,
+      total: careers.length
     });
   } catch (error) {
     res.status(500).json({
@@ -112,6 +119,37 @@ exports.getCareerById = (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to fetch career"
+    });
+  }
+};
+
+// NEW: Get AI-enhanced career summary
+exports.getCareerSummary = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const career = careers.find(c => c.id === parseInt(id));
+
+    if (!career) {
+      return res.status(404).json({
+        success: false,
+        error: "Career not found"
+      });
+    }
+
+    // Generate AI summary
+    const aiSummary = await geminiService.generateCareerSummary(career);
+
+    res.json({
+      success: true,
+      career: {
+        ...career,
+        aiSummary: aiSummary
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Failed to generate career summary"
     });
   }
 };
