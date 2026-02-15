@@ -1,11 +1,22 @@
 const careers = require("../data/careers.json");
-const questions = require("../data/questions.json");
 
 class RecommendationEngine {
   
-  // NEW: Get recommendations based on assessment answers
+  // Analyze swipe assessment answers and match to careers
   getRecommendationsFromAnswers(answers) {
-    // Calculate category scores based on answers
+    // Map your actual swipe assessment categories to interests
+    const categoryMapping = {
+      tech: "technology",
+      creative: "design",
+      social: "business",
+      analytical: "technology",
+      impact: "science",
+      entrepreneurial: "business",
+      healthcare: "science",
+      dynamic: "business",
+      ambitious: "business"
+    };
+
     const categoryScores = {
       technology: 0,
       business: 0,
@@ -14,44 +25,69 @@ class RecommendationEngine {
       arts: 0
     };
 
-    // Process each answer
-    Object.keys(answers).forEach((questionId) => {
-      const answer = answers[questionId];
-      const question = questions.find(q => q.id === parseInt(questionId));
+    // Count swipes by category from your frontend questions
+    Object.entries(answers).forEach(([questionId, swipeDirection]) => {
+      // Find the question to get its category
+      const questionData = this.getQuestionCategory(parseInt(questionId));
       
-      if (question && answer === "right") {
-        // "right" swipe means they agree/like it
-        categoryScores[question.category] += question.weight;
+      if (questionData && swipeDirection === "right") {
+        const mappedCategory = categoryMapping[questionData] || questionData;
+        if (categoryScores[mappedCategory] !== undefined) {
+          categoryScores[mappedCategory] += 3;
+        }
       }
     });
 
-    // Find top categories
+    // Find top 2 categories
     const sortedCategories = Object.entries(categoryScores)
       .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0]);
+      .slice(0, 2);
 
-    const topCategory = sortedCategories[0];
+    const topCategory = sortedCategories[0][0];
+    const secondCategory = sortedCategories[1] ? sortedCategories[1][0] : null;
 
     // Get matching careers
     let matchedCareers = this.getCareersByInterest(topCategory);
+    
+    // Add some from second category for variety
+    if (secondCategory) {
+      const secondaryCareers = this.getCareersByInterest(secondCategory).slice(0, 2);
+      matchedCareers = [...matchedCareers, ...secondaryCareers];
+    }
 
-    // Add match scores based on category alignment
+    // Get detailed career info with match scores
     const detailedCareers = matchedCareers.map(careerName => {
       const career = this.getCareerDetails(careerName);
       if (career) {
-        // Calculate match score based on category scores
-        const baseScore = 70;
-        const categoryBonus = categoryScores[topCategory] * 2;
-        career.matchScore = Math.min(baseScore + categoryBonus, 98);
+        // Calculate match score
+        const baseScore = 75;
+        const topBonus = categoryScores[topCategory] || 0;
+        const secondBonus = secondCategory ? (categoryScores[secondCategory] || 0) * 0.5 : 0;
+        career.matchScore = Math.min(baseScore + topBonus + secondBonus, 98);
         return career;
       }
       return null;
     }).filter(c => c !== null);
 
-    // Sort by match score and return top 5
-    return detailedCareers
+    // Remove duplicates and sort by match score
+    const uniqueCareers = Array.from(
+      new Map(detailedCareers.map(c => [c.name, c])).values()
+    );
+
+    return uniqueCareers
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 5);
+  }
+
+  // Helper to map question IDs to categories (based on your swipe-assessment.tsx)
+  getQuestionCategory(questionId) {
+    const questionMap = {
+      1: "tech", 2: "creative", 3: "social", 4: "tech",
+      5: "creative", 6: "creative", 7: "analytical", 8: "social",
+      9: "impact", 10: "entrepreneurial", 11: "analytical", 12: "creative",
+      13: "healthcare", 14: "dynamic", 15: "ambitious"
+    };
+    return questionMap[questionId];
   }
 
   // EXISTING: Get recommendations based on interest/subject/class
