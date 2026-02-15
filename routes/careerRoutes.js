@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const careerController = require("../controllers/careerController");
 
-// POST: Get career suggestions based on assessment
-router.post("/suggestions", careerController.getSuggestions);
+// Assessment endpoints
+router.get("/assessment/questions", careerController.getQuestions);
+router.post("/assessment/submit", careerController.submitAssessment);
 
-// GET: Get all available careers (optional)
+// Career endpoints
+router.post("/suggestions", careerController.getSuggestions);
 router.get("/all", careerController.getAllCareers);
+router.get("/:id", careerController.getCareerById);
 
 module.exports = router;
