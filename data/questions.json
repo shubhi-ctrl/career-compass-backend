@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "I enjoy solving complex problems using logic and mathematics",
+    "category": "technology",
+    "weight": 3
+  },
+  {
+    "id": 2,
+    "question": "I like creating visual designs and artistic content",
+    "category": "design",
+    "weight": 3
+  },
+  {
+    "id": 3,
+    "question": "I enjoy helping people and making a difference in their lives",
+    "category": "science",
+    "weight": 3
+  },
+  {
+    "id": 4,
+    "question": "I'm interested in starting my own business or leading teams",
+    "category": "business",
+    "weight": 3
+  },
+  {
+    "id": 5,
+    "question": "I love writing, reading, and expressing ideas through words",
+    "category": "arts",
+    "weight": 3
+  },
+  {
+    "id": 6,
+    "question": "Working with computers and technology excites me",
+    "category": "technology",
+    "weight": 2
+  },
+  {
+    "id": 7,
+    "question": "I enjoy analyzing data and finding patterns",
+    "category": "technology",
+    "weight": 2
+  },
+  {
+    "id": 8,
+    "question": "I prefer working with people over working alone",
+    "category": "business",
+    "weight": 2
+  },
+  {
+    "id": 9,
+    "question": "I'm fascinated by how the human body and nature work",
+    "category": "science",
+    "weight": 2
+  },
+  {
+    "id": 10,
+    "question": "I like creating and editing photos, videos, or graphics",
+    "category": "design",
+    "weight": 2
+  }
+]
