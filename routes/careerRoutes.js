@@ -6,9 +6,13 @@ const careerController = require("../controllers/careerController");
 router.get("/assessment/questions", careerController.getQuestions);
 router.post("/assessment/submit", careerController.submitAssessment);
 
-// Career endpoints
-router.post("/suggestions", careerController.getSuggestions);
+
 router.get("/all", careerController.getAllCareers);
+router.get("/search", careerController.searchCareers);
 router.get("/:id", careerController.getCareerById);
+
+// Try Career Out Validation (NEW!)
+router.post("/validate-task", careerController.validateCareerTask);
+router.post("/exploration-summary", careerController.getCareerExplorationSummary);
 
 module.exports = router;
