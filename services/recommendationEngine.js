@@ -1,176 +1,150 @@
-const careers = require("../data/careers.json");
+const careerAPIService = require("./careerAPIService");
+const questions = require("../data/questions.json");
 
 class RecommendationEngine {
-  
-  // Analyze swipe assessment answers and match to careers
+
+  // NEW: Analyze swipe answers and match to 50 careers
   getRecommendationsFromAnswers(answers) {
-    // Map your actual swipe assessment categories to interests
-    const categoryMapping = {
-      tech: "technology",
-      creative: "design",
-      social: "business",
-      analytical: "technology",
-      impact: "science",
-      entrepreneurial: "business",
-      healthcare: "science",
-      dynamic: "business",
-      ambitious: "business"
-    };
+    
+    // Get all 50 careers from the new service
+    const allCareers = careerAPIService.getCuratedCareerDatabase();
 
-    const categoryScores = {
-      technology: 0,
-      business: 0,
-      design: 0,
-      science: 0,
-      arts: 0
-    };
+    // Calculate match score for EACH career
+    const careerMatches = allCareers.map(career => {
+      let matchScore = 65; // Base score
 
-    // Count swipes by category from your frontend questions
-    Object.entries(answers).forEach(([questionId, swipeDirection]) => {
-      // Find the question to get its category
-      const questionData = this.getQuestionCategory(parseInt(questionId));
-      
-      if (questionData && swipeDirection === "right") {
-        const mappedCategory = categoryMapping[questionData] || questionData;
-        if (categoryScores[mappedCategory] !== undefined) {
-          categoryScores[mappedCategory] += 3;
+      // Go through each answered question
+      Object.entries(answers).forEach(([questionId, answer]) => {
+        if (answer === "right") {
+          // Find the question in our 30-question database
+          const question = questions.find(q => q.id === parseInt(questionId));
+          
+          if (question) {
+            // Check if this career is in this question's matching careers
+            if (question.matchesCareers && question.matchesCareers.includes(career.name)) {
+              matchScore += question.weight * 2; // Add points for direct match
+            }
+            
+            // Also check category-level matching
+            if (this.categoryMatchesCareer(question.category, career.category)) {
+              matchScore += question.weight; // Partial match
+            }
+          }
         }
-      }
+      });
+
+      return {
+        ...career,
+        matchScore: Math.min(Math.round(matchScore), 98)
+      };
     });
 
-    // Find top 2 categories
-    const sortedCategories = Object.entries(categoryScores)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 2);
-
-    const topCategory = sortedCategories[0][0];
-    const secondCategory = sortedCategories[1] ? sortedCategories[1][0] : null;
-
-    // Get matching careers
-    let matchedCareers = this.getCareersByInterest(topCategory);
-    
-    // Add some from second category for variety
-    if (secondCategory) {
-      const secondaryCareers = this.getCareersByInterest(secondCategory).slice(0, 2);
-      matchedCareers = [...matchedCareers, ...secondaryCareers];
-    }
-
-    // Get detailed career info with match scores
-    const detailedCareers = matchedCareers.map(careerName => {
-      const career = this.getCareerDetails(careerName);
-      if (career) {
-        // Calculate match score
-        const baseScore = 75;
-        const topBonus = categoryScores[topCategory] || 0;
-        const secondBonus = secondCategory ? (categoryScores[secondCategory] || 0) * 0.5 : 0;
-        career.matchScore = Math.min(baseScore + topBonus + secondBonus, 98);
-        return career;
-      }
-      return null;
-    }).filter(c => c !== null);
-
-    // Remove duplicates and sort by match score
-    const uniqueCareers = Array.from(
-      new Map(detailedCareers.map(c => [c.name, c])).values()
-    );
-
-    return uniqueCareers
+    // Sort by match score and return top 5
+    const topCareers = careerMatches
+      .filter(c => c.matchScore > 68) // Only show meaningful matches
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 5);
+
+    // If less than 5 results, fill with top careers anyway
+    if (topCareers.length < 5) {
+      const remaining = careerMatches
+        .sort((a, b) => b.matchScore - a.matchScore)
+        .slice(0, 5);
+      return remaining;
+    }
+
+    return topCareers;
   }
 
-  // Helper to map question IDs to categories (based on your swipe-assessment.tsx)
-  getQuestionCategory(questionId) {
-    const questionMap = {
-      1: "tech", 2: "creative", 3: "social", 4: "tech",
-      5: "creative", 6: "creative", 7: "analytical", 8: "social",
-      9: "impact", 10: "entrepreneurial", 11: "analytical", 12: "creative",
-      13: "healthcare", 14: "dynamic", 15: "ambitious"
+  // Helper: Check if a question category matches a career category
+  categoryMatchesCareer(questionCategory, careerCategory) {
+    const categoryMap = {
+      // Question category → Career category
+      "technology": ["Technology"],
+      "analytical": ["Technology", "Business", "Science"],
+      "creative": ["Design", "Creative", "Media"],
+      "social": ["Education", "Healthcare", "Hospitality"],
+      "healthcare": ["Healthcare"],
+      "entrepreneurial": ["Business"],
+      "business": ["Business", "Banking"],
+      "research": ["Science", "Technology"],
+      "legal": ["Law", "Governance"],
+      "media": ["Media", "Creative"],
+      "sports": ["Sports"],
+      "leadership": ["Business", "Governance"],
+      "fashion": ["Fashion", "Design"],
+      "culinary": ["Hospitality"],
+      "psychology": ["Healthcare", "Education"],
+      "technical": ["Engineering", "Technology"],
+      "education": ["Education"],
+      "security": ["Technology", "Law"],
+      "ai": ["Technology"],
+      "organization": ["Business", "Hospitality"],
+      "finance": ["Business", "Banking"],
+      "design": ["Design", "Architecture"],
+      "aviation": ["Aviation"],
+      "service": ["Hospitality", "Banking"],
+      "marketing": ["Business", "Media"],
+      "environmental": ["Science"],
+      "practical": ["Engineering"],
+      "performance": ["Media", "Education"]
     };
-    return questionMap[questionId];
+
+    const matchingCategories = categoryMap[questionCategory] || [];
+    return matchingCategories.includes(careerCategory);
   }
 
-  // EXISTING: Get recommendations based on interest/subject/class
+  // EXISTING: Get recommendations based on interest/subject/class (keeping for backward compatibility)
   getRecommendations({ interest, subject, classLevel }) {
-    let matchedCareers = this.getCareersByInterest(interest);
+    const allCareers = careerAPIService.getCuratedCareerDatabase();
+    
+    // Map interest to career category
+    const interestCategoryMap = {
+      "technology": "Technology",
+      "business": "Business",
+      "design": "Design",
+      "science": "Science",
+      "arts": "Creative",
+      "healthcare": "Healthcare",
+      "engineering": "Engineering"
+    };
 
-    // Filter based on subject preference
+    const targetCategory = interestCategoryMap[interest] || interest;
+    
+    let matchedCareers = allCareers.filter(career => 
+      career.category.toLowerCase() === targetCategory.toLowerCase()
+    );
+
+    // If math subject, prioritize analytical careers
     if (subject === "mathematics") {
       matchedCareers = this.prioritizeMathCareers(matchedCareers);
     }
 
-    // Get detailed career info
-    const detailedCareers = matchedCareers.map(careerName => {
-      return this.getCareerDetails(careerName);
-    }).filter(career => career !== null);
-
-    return detailedCareers;
-  }
-
-  getCareersByInterest(interest) {
-    if (interest === "technology") {
-      return [
-        "Software Engineer",
-        "Data Analyst",
-        "AI Engineer",
-        "Cybersecurity Specialist"
-      ];
-    } else if (interest === "business") {
-      return [
-        "Entrepreneur",
-        "Business Analyst",
-        "Marketing Manager",
-        "Financial Analyst"
-      ];
-    } else if (interest === "design") {
-      return [
-        "UI/UX Designer",
-        "Graphic Designer",
-        "Animator",
-        "Product Designer"
-      ];
-    } else if (interest === "science") {
-      return [
-        "Research Scientist",
-        "Doctor",
-        "Biotechnologist",
-        "Environmental Scientist"
-      ];
-    } else if (interest === "arts") {
-      return [
-        "Content Writer",
-        "Journalist",
-        "Artist",
-        "Musician"
-      ];
-    } else {
-      return ["Career Counseling Recommended"];
-    }
+    return matchedCareers.map(career => ({
+      ...career,
+      matchScore: 80
+    })).slice(0, 5);
   }
 
   prioritizeMathCareers(careerList) {
     const mathRelatedCareers = [
-      "Software Engineer", 
-      "Data Analyst", 
+      "Software Engineer",
+      "Data Scientist",
       "Financial Analyst",
-      "AI Engineer"
+      "AI/ML Engineer",
+      "Research Scientist"
     ];
+
+    const mathCareers = careerList.filter(c => mathRelatedCareers.includes(c.name));
+    const otherCareers = careerList.filter(c => !mathRelatedCareers.includes(c.name));
     
-    return careerList.filter(c => 
-      mathRelatedCareers.includes(c)
-    ).concat(
-      careerList.filter(c => !mathRelatedCareers.includes(c))
-    );
+    return [...mathCareers, ...otherCareers];
   }
 
+  // Get career details by name (using new service)
   getCareerDetails(careerName) {
-    const careerData = careers.find(c => c.name === careerName);
-    
-    if (careerData) {
-      return careerData;
-    }
-
-    return null;
+    const allCareers = careerAPIService.getCuratedCareerDatabase();
+    return allCareers.find(c => c.name === careerName) || null;
   }
 }
 
