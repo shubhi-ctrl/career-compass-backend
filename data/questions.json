@@ -1,62 +1,212 @@
 [
   {
     "id": 1,
-    "question": "I enjoy solving complex problems using logic and mathematics",
-    "category": "technology",
-    "weight": 3
+    "question": "Do you enjoy solving complex problems using logic and analysis?",
+    "category": "analytical",
+    "weight": 3,
+    "matchesCareers": ["Software Engineer", "Data Scientist", "AI/ML Engineer", "Financial Analyst", "Research Scientist"]
   },
   {
     "id": 2,
-    "question": "I like creating visual designs and artistic content",
-    "category": "design",
-    "weight": 3
+    "question": "Are you interested in creating visual designs and artistic content?",
+    "category": "creative",
+    "weight": 3,
+    "matchesCareers": ["UI/UX Designer", "Graphic Designer", "Fashion Designer", "Animator", "Interior Designer"]
   },
   {
     "id": 3,
-    "question": "I enjoy helping people and making a difference in their lives",
-    "category": "science",
-    "weight": 3
+    "question": "Do you like working with people and helping others?",
+    "category": "social",
+    "weight": 3,
+    "matchesCareers": ["Teacher", "Doctor", "Nurse", "Psychologist", "HR Manager", "Career Counselor"]
   },
   {
     "id": 4,
-    "question": "I'm interested in starting my own business or leading teams",
-    "category": "business",
-    "weight": 3
+    "question": "Are you fascinated by technology and computers?",
+    "category": "technology",
+    "weight": 3,
+    "matchesCareers": ["Software Engineer", "Cybersecurity Analyst", "Cloud Engineer", "Data Scientist"]
   },
   {
     "id": 5,
-    "question": "I love writing, reading, and expressing ideas through words",
-    "category": "arts",
-    "weight": 3
+    "question": "Do you enjoy writing articles, stories, or creating content?",
+    "category": "creative",
+    "weight": 3,
+    "matchesCareers": ["Content Writer", "Journalist", "Social Media Manager", "Marketing Manager"]
   },
   {
     "id": 6,
-    "question": "Working with computers and technology excites me",
-    "category": "technology",
-    "weight": 2
+    "question": "Are you interested in how the human body works and medicine?",
+    "category": "healthcare",
+    "weight": 3,
+    "matchesCareers": ["Doctor", "Nurse", "Pharmacist", "Physiotherapist", "Psychologist"]
   },
   {
     "id": 7,
-    "question": "I enjoy analyzing data and finding patterns",
-    "category": "technology",
-    "weight": 2
+    "question": "Do you like working with numbers and data?",
+    "category": "analytical",
+    "weight": 3,
+    "matchesCareers": ["Financial Analyst", "Data Scientist", "Business Analyst", "Bank Manager"]
   },
   {
     "id": 8,
-    "question": "I prefer working with people over working alone",
-    "category": "business",
-    "weight": 2
+    "question": "Are you interested in starting your own business?",
+    "category": "entrepreneurial",
+    "weight": 3,
+    "matchesCareers": ["Entrepreneur", "Business Analyst", "Marketing Manager", "Product Manager"]
   },
   {
     "id": 9,
-    "question": "I'm fascinated by how the human body and nature work",
-    "category": "science",
-    "weight": 2
+    "question": "Do you enjoy hands-on work like building or fixing things?",
+    "category": "practical",
+    "weight": 3,
+    "matchesCareers": ["Mechanical Engineer", "Civil Engineer", "Electrical Engineer", "Architect"]
   },
   {
     "id": 10,
-    "question": "I like creating and editing photos, videos, or graphics",
+    "question": "Are you passionate about protecting the environment?",
+    "category": "environmental",
+    "weight": 3,
+    "matchesCareers": ["Environmental Scientist", "Agricultural Scientist", "Biotechnologist"]
+  },
+  {
+    "id": 11,
+    "question": "Do you like performing or being in front of an audience?",
+    "category": "performance",
+    "weight": 2,
+    "matchesCareers": ["Journalist", "Teacher", "Event Manager", "Social Media Manager"]
+  },
+  {
+    "id": 12,
+    "question": "Are you interested in understanding how markets and economies work?",
+    "category": "business",
+    "weight": 3,
+    "matchesCareers": ["Financial Analyst", "Business Analyst", "Marketing Manager", "Entrepreneur"]
+  },
+  {
+    "id": 13,
+    "question": "Do you enjoy conducting experiments and research?",
+    "category": "research",
+    "weight": 3,
+    "matchesCareers": ["Research Scientist", "Biotechnologist", "Data Scientist", "Environmental Scientist"]
+  },
+  {
+    "id": 14,
+    "question": "Are you interested in laws, justice, and legal systems?",
+    "category": "legal",
+    "weight": 3,
+    "matchesCareers": ["Lawyer", "Civil Services", "HR Manager"]
+  },
+  {
+    "id": 15,
+    "question": "Do you like creating videos or working with media?",
+    "category": "media",
+    "weight": 3,
+    "matchesCareers": ["Video Editor", "Photographer", "Social Media Manager", "Journalist"]
+  },
+  {
+    "id": 16,
+    "question": "Are you interested in fitness and sports?",
+    "category": "sports",
+    "weight": 2,
+    "matchesCareers": ["Sports Coach", "Fitness Trainer", "Physiotherapist"]
+  },
+  {
+    "id": 17,
+    "question": "Do you enjoy managing projects and leading teams?",
+    "category": "leadership",
+    "weight": 3,
+    "matchesCareers": ["Product Manager", "Project Manager", "Hotel Manager", "Civil Services"]
+  },
+  {
+    "id": 18,
+    "question": "Are you interested in fashion and style?",
+    "category": "fashion",
+    "weight": 2,
+    "matchesCareers": ["Fashion Designer", "Makeup Artist", "Interior Designer", "Graphic Designer"]
+  },
+  {
+    "id": 19,
+    "question": "Do you like working with food and cooking?",
+    "category": "culinary",
+    "weight": 2,
+    "matchesCareers": ["Chef", "Hotel Manager", "Event Manager"]
+  },
+  {
+    "id": 20,
+    "question": "Are you interested in understanding human behavior and psychology?",
+    "category": "psychology",
+    "weight": 3,
+    "matchesCareers": ["Psychologist", "Career Counselor", "HR Manager", "Social Media Manager"]
+  },
+  {
+    "id": 21,
+    "question": "Do you enjoy working with machinery and technology?",
+    "category": "technical",
+    "weight": 3,
+    "matchesCareers": ["Mechanical Engineer", "Electrical Engineer", "Cloud Engineer", "Pilot"]
+  },
+  {
+    "id": 22,
+    "question": "Are you interested in education and teaching others?",
+    "category": "education",
+    "weight": 3,
+    "matchesCareers": ["Teacher", "College Professor", "Corporate Trainer", "Career Counselor"]
+  },
+  {
+    "id": 23,
+    "question": "Do you like analyzing security threats and protecting systems?",
+    "category": "security",
+    "weight": 3,
+    "matchesCareers": ["Cybersecurity Analyst", "Lawyer", "Civil Services"]
+  },
+  {
+    "id": 24,
+    "question": "Are you interested in artificial intelligence and machine learning?",
+    "category": "ai",
+    "weight": 3,
+    "matchesCareers": ["AI/ML Engineer", "Data Scientist", "Software Engineer", "Research Scientist"]
+  },
+  {
+    "id": 25,
+    "question": "Do you enjoy planning and organizing events?",
+    "category": "organization",
+    "weight": 2,
+    "matchesCareers": ["Event Manager", "Project Manager", "HR Manager", "Hotel Manager"]
+  },
+  {
+    "id": 26,
+    "question": "Are you interested in finance and investment?",
+    "category": "finance",
+    "weight": 3,
+    "matchesCareers": ["Financial Analyst", "Bank Manager", "Business Analyst"]
+  },
+  {
+    "id": 27,
+    "question": "Do you like designing buildings and spaces?",
     "category": "design",
-    "weight": 2
+    "weight": 3,
+    "matchesCareers": ["Architect", "Interior Designer", "Civil Engineer", "Product Designer"]
+  },
+  {
+    "id": 28,
+    "question": "Are you interested in aviation and flying?",
+    "category": "aviation",
+    "weight": 2,
+    "matchesCareers": ["Pilot", "Air Traffic Controller"]
+  },
+  {
+    "id": 29,
+    "question": "Do you enjoy customer service and hospitality?",
+    "category": "service",
+    "weight": 2,
+    "matchesCareers": ["Hotel Manager", "Chef", "Event Manager", "Bank Manager"]
+  },
+  {
+    "id": 30,
+    "question": "Are you interested in marketing and branding?",
+    "category": "marketing",
+    "weight": 3,
+    "matchesCareers": ["Marketing Manager", "Social Media Manager", "Product Manager", "Entrepreneur"]
   }
 ]
