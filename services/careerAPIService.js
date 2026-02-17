@@ -10,15 +10,54 @@ class CareerAPIService {
   }
 
   // Get comprehensive list of careers
-  async getAllCareers() {
-    try {
-      // Return curated list of 50+ careers with details
-      return this.getCuratedCareerDatabase();
-    } catch (error) {
-      console.error('Error fetching careers:', error.message);
-      return this.getCuratedCareerDatabase();
-    }
+ async getAllCareers() {
+  try {
+    console.log("Fetching careers from ESCO API...");
+
+    const response = await axios.get(
+      "https://ec.europa.eu/esco/api/resource/occupation",
+      {
+        params: {
+          language: "en",
+          limit: 1000,
+        },
+      }
+    );
+
+    const escoCareers = response.data._embedded.results.map(
+      (career, index) => ({
+        id: index + 1000, // avoid conflict with your 50 careers
+        name: career.title,
+        category: "ESCO Career",
+        description:
+          career.description?.en || "No description available",
+        skills: [],
+        education: "Varies",
+        salary: "Varies",
+        stream: "Any",
+        growthRate: "Varies",
+        demandLevel: "Varies",
+        keywords: [career.title.toLowerCase()],
+        source: "ESCO API",
+      })
+    );
+
+    console.log(`Fetched ${escoCareers.length} careers from ESCO`);
+
+    // Combine ESCO + your existing database
+    return [
+      ...this.getCuratedCareerDatabase(),
+      ...escoCareers,
+    ];
+
+  } catch (error) {
+    console.error("ESCO API failed, using fallback:", error.message);
+
+    // fallback to your existing database
+    return this.getCuratedCareerDatabase();
   }
+}
+
 
   // Curated career database (50+ careers, no API limits!)
   getCuratedCareerDatabase() {
