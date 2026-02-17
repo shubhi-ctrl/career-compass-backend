@@ -3,201 +3,181 @@ const geminiService = require("../services/geminiService");
 const careerAPIService = require("../services/careerAPIService");
 const tryCareerService = require("../services/tryCareerService");
 
-// Get assessment questions
-exports.getQuestions = (req, res) => {
-  try {
-    // Return empty for now since frontend has its own questions
-    res.json({
-      success: true,
-      message: "Questions are handled by frontend"
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch questions"
-    });
-  }
-};
-
-// Submit assessment and get matched careers WITH AI INSIGHTS
+// ✅ Submit assessment and get matched careers WITH AI INSIGHTS
 exports.submitAssessment = async (req, res) => {
   try {
     const { answers } = req.body;
 
-    if (!answers || typeof answers !== 'object') {
+    if (!answers || typeof answers !== "object") {
       return res.status(400).json({
         success: false,
-        error: "Missing or invalid answers"
+        error: "Missing or invalid answers",
       });
     }
 
-    // Get recommendations based on swipe answers
+    console.log("📝 Processing assessment answers...");
+
+    // Get recommendations from engine
     const recommendations = recommendationEngine.getRecommendationsFromAnswers(answers);
 
-    // Generate AI insights using Gemini
-    const aiInsights = await geminiService.generateCareerInsights(answers, recommendations);
-
-    res.json({
-      success: true,
-      recommendedCareers: recommendations,
-      aiInsights: aiInsights, // NEW: Gemini-powered personalized insight!
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error("Error in submitAssessment:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to process assessment"
-    });
-  }
-};
-
-exports.getAllCareers = (req, res) => {
-  try {
-    const careers = careerAPIService.getAllCareers();
-    res.json({
-      success: true,
-      careers: careers,
-      total: careers.length,
-      source: "Career Compass Database - 50 Careers"
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch careers"
-    });
-  }
-};
-
-// Search careers
-exports.searchCareers = (req, res) => {
-  try {
-    const { keyword } = req.query;
-    const results = careerAPIService.searchCareers(keyword);
-    
-    res.json({
-      success: true,
-      results: results,
-      count: results.length
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to search careers"
-    });
-  }
-};
-
-// Submit assessment
-exports.submitAssessment = async (req, res) => {
-  try {
-    const { answers } = req.body;
-
-    if (!answers || typeof answers !== 'object') {
-      return res.status(400).json({
-        success: false,
-        error: "Missing or invalid answers"
-      });
-    }
-
-    // Get recommendations
-    const recommendations = recommendationEngine.getRecommendationsFromAnswers(answers);
-    
-    // Enhance with full career details from new API
-    const enhancedRecommendations = recommendations.map(career => {
-      const fullDetails = careerAPIService.getCareerById(career.id) || 
-                         careerAPIService.searchCareers(career.name)[0];
+    // Enhance each career with full details from careerAPIService
+    const enhancedRecommendations = recommendations.map((career) => {
+      const fullDetails =
+        careerAPIService.getCareerById(career.id) ||
+        careerAPIService.searchCareers(career.name)[0];
       return {
         ...career,
-        ...fullDetails
+        ...(fullDetails || {}),
       };
     });
 
-    // Generate AI insights
-    const aiInsights = await geminiService.generateCareerInsights(answers, enhancedRecommendations);
+    // Generate AI insights using Gemini
+    const aiInsights = await geminiService.generateCareerInsights(
+      answers,
+      enhancedRecommendations
+    );
+
+    console.log("✅ Assessment processed successfully");
 
     res.json({
       success: true,
       recommendedCareers: enhancedRecommendations,
       aiInsights: aiInsights,
-      modelAccuracy: "92%", // Based on testing with 30 questions
+      modelAccuracy: "92%",
       matchingAlgorithm: "Multi-factor weighted scoring",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Error in submitAssessment:", error);
+    console.error("❌ Error in submitAssessment:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to process assessment"
+      error: "Failed to process assessment",
     });
   }
 };
 
-// NEW: Validate user's "Try Career Out" submission
-exports.validateCareerTask = async (req, res) => {
+// ✅ Get ALL 50 careers
+exports.getAllCareers = (req, res) => {
   try {
-    const { taskId, userSubmission, careerName } = req.body;
+    const careers = careerAPIService.getCuratedCareerDatabase();
+    res.json({
+      success: true,
+      careers: careers,
+      total: careers.length,
+      source: "Career Compass Database - 50 Careers",
+    });
+  } catch (error) {
+    console.error("❌ Error in getAllCareers:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch careers",
+    });
+  }
+};
 
-    if (!userSubmission || !careerName) {
+// ✅ Search careers by keyword
+exports.searchCareers = (req, res) => {
+  try {
+    const { keyword } = req.query;
+
+    if (!keyword) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields"
+        error: "keyword query parameter is required",
       });
     }
 
-    // Get task details (you'll pass this from frontend)
-    const task = { task: req.body.taskDescription };
+    const results = careerAPIService.searchCareers(keyword);
 
-    // Validate with Gemini AI
-    const evaluation = await tryCareerService.validateUserWork(task, userSubmission, careerName);
+    res.json({
+      success: true,
+      results: results,
+      count: results.length,
+    });
+  } catch (error) {
+    console.error("❌ Error in searchCareers:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to search careers",
+    });
+  }
+};
+
+// ✅ Validate user's "Try Career Out" task submission with Gemini AI
+exports.validateCareerTask = async (req, res) => {
+  try {
+    const { taskId, userSubmission, careerName, taskDescription } = req.body;
+
+    if (!userSubmission || !careerName || !taskDescription) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields: userSubmission, careerName, taskDescription",
+      });
+    }
+
+    console.log(`🤖 Validating task for ${careerName}...`);
+
+    const task = { task: taskDescription };
+    const evaluation = await tryCareerService.validateUserWork(
+      task,
+      userSubmission,
+      careerName
+    );
 
     res.json({
       success: true,
       evaluation: evaluation,
-      generatedBy: "Gemini AI"
+      generatedBy: "Gemini AI",
     });
   } catch (error) {
-    console.error("Error validating task:", error);
+    console.error("❌ Error validating task:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to validate task"
+      error: "Failed to validate task",
     });
   }
 };
 
-// NEW: Get summary of completed tasks
+// ✅ Get summary of all completed tasks
 exports.getCareerExplorationSummary = async (req, res) => {
   try {
     const { completedTasks, careerName } = req.body;
 
-    if (!completedTasks || completedTasks.length === 0) {
+    if (!completedTasks || completedTasks.length === 0 || !careerName) {
       return res.status(400).json({
         success: false,
-        error: "No completed tasks provided"
+        error: "completedTasks array and careerName are required",
       });
     }
 
-    const summary = await tryCareerService.generateCareerSummary(completedTasks, careerName);
+    console.log(`📊 Generating summary for ${careerName}...`);
+
+    const summary = await tryCareerService.generateCareerSummary(
+      completedTasks,
+      careerName
+    );
+
+    const averageScore = (
+      completedTasks.reduce((sum, t) => sum + (t.score || 0), 0) /
+      completedTasks.length
+    ).toFixed(1);
 
     res.json({
       success: true,
       summary: summary,
       tasksCompleted: completedTasks.length,
-      averageScore: (completedTasks.reduce((sum, t) => sum + t.score, 0) / completedTasks.length).toFixed(1)
+      averageScore: averageScore,
     });
   } catch (error) {
+    console.error("❌ Error generating summary:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to generate summary"
+      error: "Failed to generate summary",
     });
   }
 };
 
-
-
-
-
-// Get career suggestions (legacy endpoint)
+// ✅ Get career suggestions (legacy endpoint - kept for backward compat)
 exports.getSuggestions = async (req, res) => {
   try {
     const { interest, subject, classLevel } = req.body;
@@ -205,97 +185,51 @@ exports.getSuggestions = async (req, res) => {
     if (!interest || !subject || !classLevel) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: interest, subject, classLevel"
+        error: "Missing required fields: interest, subject, classLevel",
       });
     }
 
     const recommendations = recommendationEngine.getRecommendations({
       interest,
       subject,
-      classLevel
+      classLevel,
     });
 
     res.json({
       success: true,
-      recommendedCareers: recommendations
+      recommendedCareers: recommendations,
     });
   } catch (error) {
-    console.error("Error in getSuggestions:", error);
+    console.error("❌ Error in getSuggestions:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to generate recommendations"
+      error: "Failed to generate recommendations",
     });
   }
 };
 
-// Get all careers
-exports.getAllCareers = (req, res) => {
-  try {
-    res.json({
-      success: true,
-      careers: careers,
-      total: careers.length
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch careers"
-    });
-  }
-};
-
-// Get single career by ID
+// ✅ Get single career by ID
 exports.getCareerById = (req, res) => {
   try {
     const { id } = req.params;
-    const career = careers.find(c => c.id === parseInt(id));
+    const career = careerAPIService.getCareerById(parseInt(id));
 
     if (!career) {
       return res.status(404).json({
         success: false,
-        error: "Career not found"
+        error: "Career not found",
       });
     }
 
     res.json({
       success: true,
-      career: career
+      career: career,
     });
   } catch (error) {
+    console.error("❌ Error in getCareerById:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch career"
-    });
-  }
-};
-
-// NEW: Get AI-enhanced career summary
-exports.getCareerSummary = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const career = careers.find(c => c.id === parseInt(id));
-
-    if (!career) {
-      return res.status(404).json({
-        success: false,
-        error: "Career not found"
-      });
-    }
-
-    // Generate AI summary
-    const aiSummary = await geminiService.generateCareerSummary(career);
-
-    res.json({
-      success: true,
-      career: {
-        ...career,
-        aiSummary: aiSummary
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Failed to generate career summary"
+      error: "Failed to fetch career",
     });
   }
 };
