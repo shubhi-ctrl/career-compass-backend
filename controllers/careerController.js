@@ -57,23 +57,30 @@ exports.submitAssessment = async (req, res) => {
 };
 
 // ✅ Get ALL 50 careers
-exports.getAllCareers = (req, res) => {
+// ✅ Get ALL careers (Curated + ESCO API)
+exports.getAllCareers = async (req, res) => {
   try {
-    const careers = careerAPIService.getCuratedCareerDatabase();
+    console.log("📡 Fetching careers from ESCO + database...");
+
+    const careers = await careerAPIService.getAllCareers();
+
     res.json({
       success: true,
       careers: careers,
       total: careers.length,
-      source: "Career Compass Database - 50 Careers",
+      source: "ESCO API + Career Compass Database",
     });
+
   } catch (error) {
     console.error("❌ Error in getAllCareers:", error);
+
     res.status(500).json({
       success: false,
       error: "Failed to fetch careers",
     });
   }
 };
+
 
 // ✅ Search careers by keyword
 exports.searchCareers = (req, res) => {
