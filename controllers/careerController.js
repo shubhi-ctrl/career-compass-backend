@@ -2,6 +2,43 @@ const { getSmartRecommendations, generateAIInsight } = require("../services/smar
 const tryCareerService = require("../services/tryCareerService");
 const careerAPIService = require("../services/careerAPIService");
 
+// ✅ Get assessment questions
+exports.getQuestions = (req, res) => {
+  try {
+    const questions = [
+      {
+        id: 1,
+        question: "What type of work environment do you prefer?",
+        options: ["Office", "Outdoors", "Remote", "Lab/Studio"],
+      },
+      {
+        id: 2,
+        question: "Which subjects do you enjoy most?",
+        options: ["Science & Math", "Arts & Design", "People & Communication", "Technology"],
+      },
+      {
+        id: 3,
+        question: "What kind of tasks energize you?",
+        options: ["Solving problems", "Creating things", "Helping others", "Organizing & planning"],
+      },
+      {
+        id: 4,
+        question: "How do you prefer to work?",
+        options: ["Alone", "In a small team", "In a large team", "With the public"],
+      },
+      {
+        id: 5,
+        question: "What matters most to you in a career?",
+        options: ["High salary", "Making a difference", "Creative freedom", "Job stability"],
+      },
+    ];
+
+    res.json({ success: true, questions, total: questions.length });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to fetch questions" });
+  }
+};
+
 // ✅ MAIN: Submit assessment → Smart AI + ESCO matching
 exports.submitAssessment = async (req, res) => {
   try {
