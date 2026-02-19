@@ -1,19 +1,20 @@
 /**
  * O*NET Web Services Integration
- * Auth: HTTP Basic (Username + Password)
+ * Auth: API Key passed as query param
  * Docs: https://services.onetcenter.org/
  */
 
 const ONET_BASE_URL = "https://services.onetcenter.org/ws";
 
 function onetHeaders() {
-  const credentials = Buffer.from(
-    `${process.env.ONET_USERNAME}:${process.env.ONET_PASSWORD}`
-  ).toString("base64");
   return {
-    Authorization: `Basic ${credentials}`,
     Accept: "application/json",
   };
+}
+
+function withApiKey(url) {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}client=${process.env.ONET_API_KEY}`;
 }
 
 /**
@@ -21,7 +22,9 @@ function onetHeaders() {
  */
 async function searchOccupations(query) {
   try {
-    const url = `${ONET_BASE_URL}/search?keyword=${encodeURIComponent(query)}&client=career-compass`;
+    const url = withApiKey(
+      `${ONET_BASE_URL}/search?keyword=${encodeURIComponent(query)}`
+    );
     const res = await fetch(url, { headers: onetHeaders() });
     if (!res.ok) throw new Error(`O*NET search failed: ${res.status}`);
     const data = await res.json();
@@ -41,9 +44,9 @@ async function searchOccupations(query) {
 async function getOccupationDetails(socCode) {
   try {
     const [summaryRes, skillsRes, outlookRes] = await Promise.all([
-      fetch(`${ONET_BASE_URL}/occupations/${socCode}/summary`, { headers: onetHeaders() }),
-      fetch(`${ONET_BASE_URL}/occupations/${socCode}/skills`, { headers: onetHeaders() }),
-      fetch(`${ONET_BASE_URL}/occupations/${socCode}/outlook`, { headers: onetHeaders() }),
+      fetch(withApiKey(`${ONET_BASE_URL}/occupations/${socCode}/summary`), { headers: onetHeaders() }),
+      fetch(withApiKey(`${ONET_BASE_URL}/occupations/${socCode}/skills`), { headers: onetHeaders() }),
+      fetch(withApiKey(`${ONET_BASE_URL}/occupations/${socCode}/outlook`), { headers: onetHeaders() }),
     ]);
 
     const summary = summaryRes.ok ? await summaryRes.json() : null;
