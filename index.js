@@ -11,6 +11,8 @@ app.use(cors());
 // Routes
 const careerRoutes = require("./routes/careerRoutes");
 app.use("/api/careers", careerRoutes);
+const analysisRoutes = require("./routes/analysis");
+app.use("/api/analysis", analysisRoutes);
 
 // Health check endpoint
 app.get("/", (req, res) => {
