@@ -2,9 +2,8 @@ const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
 
-// In production (Render), use the persistent disk at /data.
-// Locally, keep it inside database/.
-const dbDir = process.env.NODE_ENV === "production" ? "/data" : path.join(__dirname);
+// DB lives in the database/ folder (writable on both local and Render free tier)
+const dbDir = path.join(__dirname);
 if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true });
 
 const dbPath = path.join(dbDir, "careers.db");
