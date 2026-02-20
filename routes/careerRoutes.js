@@ -6,13 +6,22 @@ const careerController = require("../controllers/careerController");
 router.get("/assessment/questions", careerController.getQuestions);
 router.post("/assessment/submit", careerController.submitAssessment);
 
-
+// Read endpoints
 router.get("/all", careerController.getAllCareers);
 router.get("/search", careerController.searchCareers);
-router.get("/:id", careerController.getCareerById);
+router.get("/bright-outlook", careerController.getBrightOutlook);
 
-// Try Career Out Validation (NEW!)
+// Try Career Out Validation
 router.post("/validate-task", careerController.validateCareerTask);
 router.post("/exploration-summary", careerController.getCareerExplorationSummary);
+router.post("/suggestions", careerController.getSuggestions);
+
+// Admin CRUD (POST before /:id to avoid route conflicts)
+router.post("/", careerController.createCareer);
+router.put("/:id", careerController.updateCareer);
+router.delete("/:id", careerController.deleteCareer);
+
+// Single career (must come after specific named routes)
+router.get("/:id", careerController.getCareerById);
 
 module.exports = router;

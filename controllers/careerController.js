@@ -1,6 +1,6 @@
 const { getSmartRecommendations, generateAIInsight } = require("../services/smartRecommendationEngine");
 const tryCareerService = require("../services/tryCareerService");
-const careerAPIService = require("../services/careerAPIService");
+const Career = require("../models/Career");
 
 // ✅ Get assessment questions
 exports.getQuestions = (req, res) => {
@@ -72,25 +72,40 @@ exports.submitAssessment = async (req, res) => {
   }
 };
 
-// ✅ Get all 50 careers
+// ✅ Get all careers from DB (supports ?limit & ?offset for pagination)
 exports.getAllCareers = (req, res) => {
   try {
-    const careers = careerAPIService.getCuratedCareerDatabase();
-    res.json({ success: true, careers, total: careers.length });
+    const limit = parseInt(req.query.limit) || 100;
+    const offset = parseInt(req.query.offset) || 0;
+    const careers = Career.getAll({ limit, offset });
+    const total = Career.count();
+    res.json({ success: true, careers, total, limit, offset });
   } catch (error) {
+    console.error("getAllCareers error:", error.message);
     res.status(500).json({ success: false, error: "Failed to fetch careers" });
   }
 };
 
-// ✅ Search careers
+// ✅ Search careers via FTS
 exports.searchCareers = (req, res) => {
   try {
     const { keyword } = req.query;
     if (!keyword) return res.status(400).json({ success: false, error: "keyword required" });
-    const results = careerAPIService.searchCareers(keyword);
+    const results = Career.search(keyword);
     res.json({ success: true, results, count: results.length });
   } catch (error) {
+    console.error("searchCareers error:", error.message);
     res.status(500).json({ success: false, error: "Failed to search" });
+  }
+};
+
+// ✅ Get bright-outlook careers
+exports.getBrightOutlook = (req, res) => {
+  try {
+    const careers = Career.getBrightOutlook();
+    res.json({ success: true, careers, total: careers.length });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to fetch bright-outlook careers" });
   }
 };
 
@@ -129,10 +144,10 @@ exports.getCareerExplorationSummary = async (req, res) => {
   }
 };
 
-// ✅ Get single career by ID
+// ✅ Get single career by onet_code or numeric id
 exports.getCareerById = (req, res) => {
   try {
-    const career = careerAPIService.getCareerById(parseInt(req.params.id));
+    const career = Career.getById(req.params.id);
     if (!career) return res.status(404).json({ success: false, error: "Career not found" });
     res.json({ success: true, career });
   } catch (error) {
@@ -140,14 +155,46 @@ exports.getCareerById = (req, res) => {
   }
 };
 
-// ✅ Legacy suggestions
+// ── Admin CRUD ──────────────────────────────────────────────────────────────
+
+// POST /api/careers  – create a new career
+exports.createCareer = (req, res) => {
+  try {
+    const career = Career.create(req.body);
+    res.status(201).json({ success: true, career });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+// PUT /api/careers/:id  – update a career
+exports.updateCareer = (req, res) => {
+  try {
+    const career = Career.update(req.params.id, req.body);
+    if (!career) return res.status(404).json({ success: false, error: "Career not found" });
+    res.json({ success: true, career });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+// DELETE /api/careers/:id  – delete a career
+exports.deleteCareer = (req, res) => {
+  try {
+    const deleted = Career.remove(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, error: "Career not found" });
+    res.json({ success: true, message: "Career deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ✅ Legacy suggestions (now uses DB search)
 exports.getSuggestions = async (req, res) => {
   try {
     const { interest } = req.body;
     if (!interest) return res.status(400).json({ success: false, error: "Missing interest" });
-    const careers = careerAPIService.getCuratedCareerDatabase()
-      .filter(c => c.category.toLowerCase().includes(interest.toLowerCase()))
-      .slice(0, 5);
+    const careers = Career.search(interest, { limit: 5 });
     res.json({ success: true, recommendedCareers: careers });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to get suggestions" });
