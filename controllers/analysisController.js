@@ -3,6 +3,24 @@ const { enrichCareerWithOnet } = require("../services/onetService");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// ── Retry wrapper for Gemini (handles 429 quota errors) ──────────────────────
+async function callGeminiWithRetry(model, parts, retries = 3, delayMs = 2500) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await model.generateContent(parts);
+      return response.response.text();
+    } catch (err) {
+      const is429 = err.message?.includes("429") || err.message?.includes("quota") || err.message?.includes("Too Many Requests");
+      if (is429 && attempt < retries) {
+        console.warn(`Gemini 429 quota hit — retrying in ${delayMs * attempt}ms (attempt ${attempt}/${retries})`);
+        await new Promise(r => setTimeout(r, delayMs * attempt));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 /**
  * POST /api/analysis/career-task
  *
@@ -22,9 +40,9 @@ async function analyzeCareerTask(req, res) {
 
     const tasks = JSON.parse(tasksJson);
     const userContext = contextJson ? JSON.parse(contextJson) : {};
-    const imageFile = req.file; // multer puts uploaded file here
+    const imageFile = req.file;
 
-    // ── Build Gemini prompt ───────────────────────────────────────────────
+    // ── Build Gemini prompt ──────────────────────────────────────────────────
     const textPrompt = `You are an expert career counsellor and psychologist. A user has just completed "Try This Career Out" tasks for: **${careerTitle}**.
 
 User Context:
@@ -60,12 +78,9 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
   "motivationalMessage": "<one warm encouraging closing message>"
 }`;
 
-    // ── Call Gemini ───────────────────────────────────────────────────────
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1beta" });
 
     const parts = [{ text: textPrompt }];
-
-    // Attach image if uploaded
     if (imageFile) {
       parts.push({
         inlineData: {
@@ -75,8 +90,20 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
       });
     }
 
-    const geminiResponse = await model.generateContent(parts);
-    const rawText = geminiResponse.response.text();
+    let rawText;
+    try {
+      rawText = await callGeminiWithRetry(model, parts);
+    } catch (err) {
+      const isQuota = err.message?.includes("429") || err.message?.includes("quota");
+      if (isQuota) {
+        return res.status(503).json({
+          success: false,
+          error: "AI is temporarily unavailable due to high demand. Please try again in a few minutes.",
+          quotaExceeded: true,
+        });
+      }
+      throw err;
+    }
 
     let analysis;
     try {
@@ -86,22 +113,11 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
       analysis = { raw: rawText, parseError: true };
     }
 
-    // ── Enrich with O*NET ─────────────────────────────────────────────────
     let onetData = null;
     let alternativeOnetData = null;
-
-    try {
-      onetData = await enrichCareerWithOnet(careerTitle);
-    } catch (e) {
-      console.error("O*NET primary enrichment failed:", e.message);
-    }
-
+    try { onetData = await enrichCareerWithOnet(careerTitle); } catch { }
     if (analysis.alternativeCareers?.length) {
-      try {
-        alternativeOnetData = await enrichCareerWithOnet(analysis.alternativeCareers[0]);
-      } catch (e) {
-        console.error("O*NET alternative enrichment failed:", e.message);
-      }
+      try { alternativeOnetData = await enrichCareerWithOnet(analysis.alternativeCareers[0]); } catch { }
     }
 
     return res.json({ success: true, analysis, onetData, alternativeOnetData });
@@ -111,4 +127,64 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
   }
 }
 
-module.exports = { analyzeCareerTask };
+/**
+ * POST /api/analysis/skill-gap
+ * Body: { targetCareer: string, currentSkills: string[] }
+ */
+async function analyzeSkillGap(req, res) {
+  try {
+    const { targetCareer, currentSkills } = req.body;
+    if (!targetCareer || !currentSkills)
+      return res.status(400).json({ success: false, error: "targetCareer and currentSkills are required" });
+
+    const skillsList = Array.isArray(currentSkills) ? currentSkills : currentSkills.split(",").map(s => s.trim());
+
+    const prompt = `You are a career skills advisor. A user wants to become a **${targetCareer}** and currently has these skills: ${skillsList.join(", ")}.
+
+Respond ONLY with a valid JSON object — no markdown, no extra text:
+
+{
+  "existingStrengths": ["<skill 1>", "<skill 2>"],
+  "skillGaps": [
+    { "skill": "<skill name>", "priority": "<High|Medium|Low>", "reason": "<brief why it matters>", "resource": "<free online resource or platform>" }
+  ],
+  "overallReadiness": <0-100>,
+  "readinessLabel": "<Beginner | Building | Intermediate | Advanced | Job-Ready>",
+  "estimatedTimeToReady": "<e.g. 3-6 months>",
+  "nextAction": "<one specific next step they should take this week>",
+  "encouragement": "<one warm sentence of encouragement>"
+}`;
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1beta" });
+
+    let rawText;
+    try {
+      rawText = await callGeminiWithRetry(model, [{ text: prompt }]);
+    } catch (err) {
+      const isQuota = err.message?.includes("429") || err.message?.includes("quota");
+      if (isQuota) {
+        return res.status(503).json({
+          success: false,
+          error: "AI is temporarily unavailable. Please try again in a few minutes.",
+          quotaExceeded: true,
+        });
+      }
+      throw err;
+    }
+
+    let result;
+    try {
+      const clean = rawText.replace(/```json|```/g, "").trim();
+      result = JSON.parse(clean);
+    } catch {
+      result = { raw: rawText, parseError: true };
+    }
+
+    return res.json({ success: true, result });
+  } catch (err) {
+    console.error("analyzeSkillGap error:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+module.exports = { analyzeCareerTask, analyzeSkillGap };

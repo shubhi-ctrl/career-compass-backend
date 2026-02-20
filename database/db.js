@@ -48,5 +48,26 @@ db.exec(`
   );
 `);
 
-// FTS trigger helpers (populated after import)
+// Auth + progress tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT NOT NULL,
+    email        TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at   TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS user_progress (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL,
+    career_title    TEXT NOT NULL,
+    tasks_json      TEXT,
+    analysis_result TEXT,
+    updated_at      TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(user_id, career_title)
+  );
+`);
+
 module.exports = db;

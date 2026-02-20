@@ -1,10 +1,9 @@
 const express = require("express");
 const multer = require("multer");
-const { analyzeCareerTask } = require("../controllers/analysisController");
+const { analyzeCareerTask, analyzeSkillGap } = require("../controllers/analysisController");
 
 const router = express.Router();
 
-// Memory storage — passes image buffer directly to Claude API
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
@@ -22,4 +21,8 @@ const upload = multer({
 // POST /api/analysis/career-task
 router.post("/career-task", upload.single("image"), analyzeCareerTask);
 
+// POST /api/analysis/skill-gap
+router.post("/skill-gap", express.json(), analyzeSkillGap);
+
 module.exports = router;
+

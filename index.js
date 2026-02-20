@@ -13,21 +13,23 @@ const careerRoutes = require("./routes/careerRoutes");
 app.use("/api/careers", careerRoutes);
 const analysisRoutes = require("./routes/analysis");
 app.use("/api/analysis", analysisRoutes);
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);
 
 // Health check endpoint
 app.get("/", (req, res) => {
-  res.json({ 
-    success: true, 
-    message: "Career Compass Backend is running!" 
+  res.json({
+    success: true,
+    message: "Career Compass Backend is running!"
   });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    success: false, 
-    error: "Something went wrong!" 
+  res.status(500).json({
+    success: false,
+    error: "Something went wrong!"
   });
 });
 
