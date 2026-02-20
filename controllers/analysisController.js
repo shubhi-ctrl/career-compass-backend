@@ -1,7 +1,7 @@
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { enrichCareerWithOnet } = require("../services/onetService");
 
-const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
  * POST /api/analysis/career-task
@@ -24,9 +24,7 @@ async function analyzeCareerTask(req, res) {
     const userContext = contextJson ? JSON.parse(contextJson) : {};
     const imageFile = req.file; // multer puts uploaded file here
 
-    // ── Build Claude message ──────────────────────────────────────────────
-    const contentParts = [];
-
+    // ── Build Gemini prompt ───────────────────────────────────────────────
     const textPrompt = `You are an expert career counsellor and psychologist. A user has just completed "Try This Career Out" tasks for: **${careerTitle}**.
 
 User Context:
@@ -36,15 +34,15 @@ ${userContext.interests ? `- Interests: ${userContext.interests}` : ""}
 
 Tasks attempted:
 ${tasks
-  .map(
-    (t, i) => `
+        .map(
+          (t, i) => `
 Task ${i + 1}: ${t.title}
 Description: ${t.description}
 User's notes: ${t.userAnswer || "(no response written)"}
 Time spent: ${t.timeSpent || "not specified"}
 Completed: ${t.completed ? "Yes" : "No"}`
-  )
-  .join("\n---")}
+        )
+        .join("\n---")}
 
 ${imageFile ? "The user has uploaded an image of their work. Please analyse it as part of your assessment." : ""}
 
@@ -62,28 +60,23 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
   "motivationalMessage": "<one warm encouraging closing message>"
 }`;
 
-    contentParts.push({ type: "text", text: textPrompt });
+    // ── Call Gemini ───────────────────────────────────────────────────────
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const parts = [{ text: textPrompt }];
 
     // Attach image if uploaded
     if (imageFile) {
-      contentParts.push({
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: imageFile.mimetype,
+      parts.push({
+        inlineData: {
+          mimeType: imageFile.mimetype,
           data: imageFile.buffer.toString("base64"),
         },
       });
     }
 
-    // ── Call Claude ───────────────────────────────────────────────────────
-    const claudeResponse = await anthropic.messages.create({
-      model: "claude-opus-4-6",
-      max_tokens: 1024,
-      messages: [{ role: "user", content: contentParts }],
-    });
-
-    const rawText = claudeResponse.content[0]?.text || "";
+    const geminiResponse = await model.generateContent(parts);
+    const rawText = geminiResponse.response.text();
 
     let analysis;
     try {
