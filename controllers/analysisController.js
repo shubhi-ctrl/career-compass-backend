@@ -78,7 +78,11 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
   "motivationalMessage": "<one warm encouraging closing message>"
 }`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1beta" });
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-1.5-flash" },
+      { apiVersion: "v1beta" }
+    );
+
 
     const parts = [{ text: textPrompt }];
     if (imageFile) {
@@ -155,7 +159,11 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
   "encouragement": "<one warm sentence of encouragement>"
 }`;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", apiVersion: "v1beta" });
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-1.5-flash" },
+      { apiVersion: "v1beta" }
+    );
+
 
     let rawText;
     try {
