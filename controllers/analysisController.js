@@ -61,7 +61,7 @@ Respond ONLY with a valid JSON object — no markdown, no extra text:
 }`;
 
     // ── Call Gemini ───────────────────────────────────────────────────────
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const parts = [{ text: textPrompt }];
 
