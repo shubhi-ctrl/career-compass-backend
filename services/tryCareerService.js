@@ -2,10 +2,10 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 class TryCareerService {
-  
+
   async validateUserWork(task, userSubmission, careerName) {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `You are an expert career mentor evaluating a student's work.
 
@@ -32,13 +32,13 @@ Be constructive, encouraging, and specific. Remember this is a high school stude
 
       const result = await model.generateContent(prompt);
       const text = result.response.text();
-      
+
       // Parse JSON from response
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
-      
+
       // Fallback
       return {
         score: 7,
@@ -47,7 +47,7 @@ Be constructive, encouraging, and specific. Remember this is a high school stude
         nextSteps: "Keep practicing!",
         overall: "Good start! Keep exploring this career path."
       };
-      
+
     } catch (error) {
       console.error("Error validating work:", error);
       return {
@@ -62,7 +62,7 @@ Be constructive, encouraging, and specific. Remember this is a high school stude
 
   async generateCareerSummary(completedTasks, careerName) {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const taskList = completedTasks.map(t => `- ${t.taskName}: Score ${t.score}/10`).join('\n');
 
@@ -84,7 +84,7 @@ Keep it positive, specific, and under 100 words.`;
 
       const result = await model.generateContent(prompt);
       return result.response.text();
-      
+
     } catch (error) {
       return `Great work exploring ${careerName}! You've shown dedication by completing ${completedTasks.length} tasks. Your efforts demonstrate genuine interest in this field. Keep building on these experiences and exploring more opportunities to learn!`;
     }

@@ -33,7 +33,7 @@ async function fetchESCOCareers(searchTerms) {
 // MAIN: Gemini analyses answers → picks search terms → ESCO gives careers → Gemini scores them
 // ============================================================
 async function getSmartRecommendations(answers) {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   // STEP 1: Turn raw answers into interest keywords using Gemini
   const questionTexts = {
@@ -191,7 +191,7 @@ Reply ONLY with a JSON array like this (no extra text):
 // ============================================================
 async function generateAIInsight(answers, careers) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const topCareers = careers.slice(0, 3).map((c) => c.name).join(", ");
     const rightCount = Object.values(answers).filter((v) => v === "right").length;
 

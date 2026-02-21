@@ -4,17 +4,17 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "AIzaSyDXHoElQd9KjpBN4GcPOEFlIzkjfq6Wtrg");
 
 class GeminiService {
-  
+
   async generateCareerInsights(userAnswers, recommendedCareers) {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       // Analyze user's swipe patterns
       const rightSwipes = Object.entries(userAnswers).filter(([_, dir]) => dir === "right").length;
       const leftSwipes = Object.entries(userAnswers).filter(([_, dir]) => dir === "left").length;
-      
+
       const careerNames = recommendedCareers.map(c => c.name).join(", ");
-      
+
       const prompt = `You are a career counselor AI helping an Indian high school student (class 9-12). 
 
 Based on their assessment:
@@ -31,12 +31,12 @@ Keep it casual, motivating, and under 100 words. Use simple language suitable fo
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
+
       return {
         insight: text,
         generatedAt: new Date().toISOString()
       };
-      
+
     } catch (error) {
       console.error("Gemini AI Error:", error);
       // Fallback insight
@@ -50,7 +50,7 @@ Keep it casual, motivating, and under 100 words. Use simple language suitable fo
 
   async generateCareerSummary(careerData) {
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `You are a career counselor for Indian students. Write a compelling, brief summary (2-3 sentences) about the career: ${careerData.name}.
 
@@ -64,9 +64,9 @@ Keep it motivating, under 60 words, and use simple language.`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
+
       return text;
-      
+
     } catch (error) {
       console.error("Gemini AI Error:", error);
       return careerData.description;
